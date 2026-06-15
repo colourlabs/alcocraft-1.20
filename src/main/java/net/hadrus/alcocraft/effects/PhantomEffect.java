@@ -14,7 +14,7 @@ public class PhantomEffect extends MobEffect {
 
     @Override
     public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
-        if(!pLivingEntity.level.isClientSide() && pLivingEntity instanceof Player player) {
+        if(!pLivingEntity.level().isClientSide() && pLivingEntity instanceof Player player) {
             player.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
         }
     }

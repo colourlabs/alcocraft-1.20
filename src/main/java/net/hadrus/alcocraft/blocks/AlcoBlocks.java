@@ -7,9 +7,7 @@ import net.hadrus.alcocraft.blocks.plants.HopBlock;
 import net.hadrus.alcocraft.blocks.plants.HopPlantBlock;
 import net.hadrus.alcocraft.blocks.workstations.KegBlock;
 import net.hadrus.alcocraft.items.AlcoItems;
-import net.hadrus.alcocraft.misc.AlcoTab;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -27,7 +25,7 @@ public class AlcoBlocks {
             DeferredRegister.create(ForgeRegistries.BLOCKS, AlcoCraft.MOD_ID);
 
     public static final RegistryObject<Block> SPRUCE_KEG = registerBlock("spruce_keg",
-            () -> new KegBlock(BlockBehaviour.Properties.copy(Blocks.BARREL).noOcclusion()), AlcoTab.ALCO_TAB);
+            () -> new KegBlock(BlockBehaviour.Properties.copy(Blocks.BARREL).noOcclusion()));
 
     public static final RegistryObject<Block> HOP_PLANT_BLOCK = registerBlockWithoutItem("hop_plant_block",
             () -> new HopPlantBlock(BlockBehaviour.Properties.copy(Blocks.CAVE_VINES_PLANT).lightLevel(CaveVines.emission(0)).noOcclusion()));
@@ -63,23 +61,17 @@ public class AlcoBlocks {
     public static final RegistryObject<Block> SPRUCE_MUG_BLOCK_NETHER_STAR_LAGER = registerBlockWithoutItem("spruce_mug_block_nether_star_lager",
             () -> new NetherStarLagerMugBlock(BlockBehaviour.Properties.copy(Blocks.BARREL).noOcclusion()));
 
-    private static <T extends Block> RegistryObject<T> registerBlock(String name,
-                                                                     Supplier<T> block,
-                                                                     CreativeModeTab tab) {
+    private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
-        registerBlockItem(name, toReturn, tab);
-
+        registerBlockItem(name, toReturn);
         return toReturn;
     }
 
-    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name,
-                                                                            RegistryObject<T> block,
-                                                                            CreativeModeTab tab) {
-        return AlcoItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().tab(tab)));
+    private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block) {
+        return AlcoItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 
-    private static <T extends Block> RegistryObject<Block> registerBlockWithoutItem(String name,
-                                                                                    Supplier<T> block) {
+    private static <T extends Block> RegistryObject<Block> registerBlockWithoutItem(String name, Supplier<T> block) {
         return BLOCKS.register(name, block);
     }
 

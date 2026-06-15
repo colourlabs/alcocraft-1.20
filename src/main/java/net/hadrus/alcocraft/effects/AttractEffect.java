@@ -17,7 +17,7 @@ public class AttractEffect extends MobEffect {
 
     @Override
     public void applyEffectTick(LivingEntity pLivingEntity, int pAmplifier) {
-        Level level = pLivingEntity.level;
+        Level level = pLivingEntity.level();
 
         for(Entity e : level.getEntities(pLivingEntity, new AABB(pLivingEntity.blockPosition()).inflate(15))){
             if (e instanceof ItemEntity item) {

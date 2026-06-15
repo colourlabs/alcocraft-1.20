@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -19,8 +20,6 @@ import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-
-import java.util.Random;
 
 public class HopPlantBlock extends CaveVinesPlantBlock {
 
@@ -35,7 +34,7 @@ public class HopPlantBlock extends CaveVinesPlantBlock {
 
     @Override
     protected GrowingPlantHeadBlock getHeadBlock() {
-        return (GrowingPlantHeadBlock)AlcoBlocks.HOP_BLOCK.get();
+        return (GrowingPlantHeadBlock) AlcoBlocks.HOP_BLOCK.get();
     }
 
     @Override
@@ -44,8 +43,8 @@ public class HopPlantBlock extends CaveVinesPlantBlock {
     }
 
     @Override
-    public void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, Random pRandom) {
-        if (pRandom.nextDouble() < 0.1D){
+    public void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
+        if (pRandom.nextDouble() < 0.1D) {
             this.performBonemeal(pLevel, pRandom, pPos, pState);
         }
     }
@@ -56,7 +55,7 @@ public class HopPlantBlock extends CaveVinesPlantBlock {
         if (p_152954_.getValue(BERRIES)) {
             Block.popResource(p_152955_, p_152956_, new ItemStack(AlcoItems.HOP.get(), 1));
             float f = Mth.randomBetween(p_152955_.random, 0.8F, 1.2F);
-            p_152955_.playSound((Player)null, p_152956_, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, f);
+            p_152955_.playSound(null, p_152956_, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, f);
             p_152955_.setBlock(p_152956_, p_152954_.setValue(BERRIES, Boolean.valueOf(false)), 2);
             return InteractionResult.sidedSuccess(p_152955_.isClientSide);
         } else {

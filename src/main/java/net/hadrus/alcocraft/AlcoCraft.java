@@ -7,21 +7,21 @@ import net.hadrus.alcocraft.effects.AlcoEffects;
 import net.hadrus.alcocraft.gui.AlcoMenuTypes;
 import net.hadrus.alcocraft.gui.KegScreen;
 import net.hadrus.alcocraft.items.AlcoItems;
+import net.hadrus.alcocraft.loot.AlcoLootModifiers;
 import net.hadrus.alcocraft.particles.AlcoParticles;
 import net.hadrus.alcocraft.recipes.AlcoRecipes;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(AlcoCraft.MOD_ID)
 public class AlcoCraft {
     public static final String MOD_ID = "alcocraft";
@@ -37,6 +37,8 @@ public class AlcoCraft {
         AlcoMenuTypes.register(eventBus);
         AlcoRecipes.register(eventBus);
         AlcoEffects.register(eventBus);
+        AlcoLootModifiers.register(eventBus);
+        AlcoCreativeTabs.register(eventBus);
         AlcoParticles.register(eventBus);
 
         eventBus.addListener(this::setup);
@@ -46,6 +48,7 @@ public class AlcoCraft {
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
+        // todo: replace
         ItemBlockRenderTypes.setRenderLayer(AlcoBlocks.SPRUCE_KEG.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(AlcoBlocks.HOP_BLOCK.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(AlcoBlocks.HOP_PLANT_BLOCK.get(), RenderType.cutout());
@@ -57,6 +60,6 @@ public class AlcoCraft {
 
     private void setup(final FMLCommonSetupEvent event) {
         LOGGER.info("HELLO FROM PREINIT");
-        LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+        LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(net.minecraft.world.level.block.Blocks.DIRT));
     }
 }

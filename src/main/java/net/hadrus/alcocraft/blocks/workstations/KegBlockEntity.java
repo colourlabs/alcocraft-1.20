@@ -9,9 +9,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
@@ -19,13 +19,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Optional;
-import java.util.Random;
 
 public class KegBlockEntity extends BlockEntity implements MenuProvider {
     private final ItemStackHandler itemHandler = new ItemStackHandler(4) {
@@ -59,22 +57,38 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
         this.data = new ContainerData() {
             public int get(int index) {
                 switch (index) {
-                    case 0: return KegBlockEntity.this.progress;
-                    case 1: return KegBlockEntity.this.maxProgress;
-                    case 2: return KegBlockEntity.this.waterLevel;
-                    case 3: return KegBlockEntity.this.beerLevel;
-                    case 4: return KegBlockEntity.this.beerType;
-                    default: return 0;
+                    case 0:
+                        return KegBlockEntity.this.progress;
+                    case 1:
+                        return KegBlockEntity.this.maxProgress;
+                    case 2:
+                        return KegBlockEntity.this.waterLevel;
+                    case 3:
+                        return KegBlockEntity.this.beerLevel;
+                    case 4:
+                        return KegBlockEntity.this.beerType;
+                    default:
+                        return 0;
                 }
             }
 
             public void set(int index, int value) {
-                switch(index) {
-                    case 0: KegBlockEntity.this.progress = value; break;
-                    case 1: KegBlockEntity.this.maxProgress = value; break;
-                    case 2: KegBlockEntity.this.waterLevel = value; break;
-                    case 3: KegBlockEntity.this.beerLevel = value; break;
-                    case 4: KegBlockEntity.this.beerType = value; break;
+                switch (index) {
+                    case 0:
+                        KegBlockEntity.this.progress = value;
+                        break;
+                    case 1:
+                        KegBlockEntity.this.maxProgress = value;
+                        break;
+                    case 2:
+                        KegBlockEntity.this.waterLevel = value;
+                        break;
+                    case 3:
+                        KegBlockEntity.this.beerLevel = value;
+                        break;
+                    case 4:
+                        KegBlockEntity.this.beerType = value;
+                        break;
                 }
             }
 
@@ -86,7 +100,7 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return new TextComponent("Keg");
+        return Component.literal("Keg");
     }
 
     @Nullable
@@ -98,25 +112,34 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
     @NotNull
     @Override
     public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
             return lazyItemHandler.cast();
         }
 
-        return super.getCapability(cap,side);
+        return super.getCapability(cap, side);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-
         lazyItemHandler = LazyOptional.of(() -> itemHandler);
     }
 
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
-
         lazyItemHandler.invalidate();
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+
+    @Nullable
+    @Override
+    public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
@@ -151,9 +174,9 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     public static void tick(Level pLevel, BlockPos pPos, BlockState pState, KegBlockEntity pBlockEntity) {
-        Random random = pLevel.random;
+        RandomSource random = pLevel.random;
 
-        if(hasRecipe(pBlockEntity)) {
+        if (hasRecipe(pBlockEntity)) {
             pBlockEntity.progress++;
             setChanged(pLevel, pPos, pState);
 
@@ -161,14 +184,13 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
                 pLevel.playSound(null, pPos, SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 0.1f, 0.5f);
             }
 
-            if(pBlockEntity.progress > pBlockEntity.maxProgress) {
+            if (pBlockEntity.progress > pBlockEntity.maxProgress) {
                 craftItem(pBlockEntity);
             }
         } else {
             pBlockEntity.resetProgress();
             setChanged(pLevel, pPos, pState);
         }
-
     }
 
     private static boolean hasRecipe(KegBlockEntity entity) {
@@ -185,24 +207,12 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private static boolean hasWater(KegBlockEntity entity) {
-        if (entity.waterLevel != 0) {
-            return true;
-        } else
-        {
-            return false;
-        }
+        return entity.waterLevel != 0;
     }
 
     private static boolean hasBeer(KegBlockEntity entity) {
-        if (entity.beerLevel != 0) {
-            return true;
-        } else
-        {
-            return false;
-        }
+        return entity.beerLevel != 0;
     }
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static void craftItem(KegBlockEntity entity) {
         Level level = entity.level;
@@ -214,11 +224,11 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
         Optional<KegRecipe> match = level.getRecipeManager()
                 .getRecipeFor(KegRecipe.Type.INSTANCE, inventory, level);
 
-        if(match.isPresent()) {
-            entity.itemHandler.extractItem(0,1, false);
-            entity.itemHandler.extractItem(1,1, false);
-            entity.itemHandler.extractItem(2,1, false);
-            entity.itemHandler.extractItem(3,1, false);
+        if (match.isPresent()) {
+            entity.itemHandler.extractItem(0, 1, false);
+            entity.itemHandler.extractItem(1, 1, false);
+            entity.itemHandler.extractItem(2, 1, false);
+            entity.itemHandler.extractItem(3, 1, false);
 
             if (match.get().getResultItem().getItem().equals(AlcoItems.SPRUCE_MUG_SUN_PALE_ALE.get())) {
                 entity.beerType = 1;
@@ -248,7 +258,6 @@ public class KegBlockEntity extends BlockEntity implements MenuProvider {
 
             entity.beerLevel = entity.waterLevel;
             entity.waterLevel = 0;
-
             entity.resetProgress();
         }
     }

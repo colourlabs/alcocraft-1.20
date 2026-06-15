@@ -36,10 +36,11 @@ public class KegBlock extends BaseEntityBlock {
         super(properties);
     }
 
-    private static final VoxelShape SHAPE = Block.box(0,0,0,16,16,16);
+    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
 
     @Override
-    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_,
+            CollisionContext p_60558_) {
         return SHAPE;
     }
 
@@ -83,21 +84,21 @@ public class KegBlock extends BaseEntityBlock {
                 ((KegBlockEntity) blockEntity).drops();
             }
         }
-
         super.onRemove(blockState, level, blockPos, newState, isMoving);
     }
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos,
-                                 Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+            Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (!pLevel.isClientSide()) {
             BlockEntity entity = pLevel.getBlockEntity(pPos);
             ItemStack itemStack = pPlayer.getItemInHand(pHand);
 
-            if (entity instanceof KegBlockEntity) {
-                if (itemStack.is(Items.WATER_BUCKET) && ((KegBlockEntity) entity).waterLevel < ((KegBlockEntity) entity).maxWaterLevel
-                        && ((KegBlockEntity) entity).beerLevel == 0) {
-                    ((KegBlockEntity) entity).waterLevel = ((KegBlockEntity) entity).waterLevel + 8;
+            if (entity instanceof KegBlockEntity keg) {
+                if (itemStack.is(Items.WATER_BUCKET) && keg.waterLevel < keg.maxWaterLevel && keg.beerLevel == 0) {
+                    keg.waterLevel = keg.waterLevel + 8;
+                    keg.setChanged();
+                    pLevel.sendBlockUpdated(pPos, pState, pState, 3);
                     pLevel.playSound(null, pPos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1f, 1f);
 
                     if (!pPlayer.isCreative()) {
@@ -108,94 +109,44 @@ public class KegBlock extends BaseEntityBlock {
                     }
 
                     pLevel.gameEvent(pPlayer, GameEvent.FLUID_PLACE, pPos);
-                } else if (itemStack.is(AlcoItems.SPRUCE_EMPTY_MUG.get()) && ((KegBlockEntity) entity).beerLevel != 0) {
 
+                } else if (itemStack.is(AlcoItems.SPRUCE_EMPTY_MUG.get()) && keg.beerLevel != 0) {
                     if (!pPlayer.isCreative()) {
                         itemStack.shrink(1);
                     }
 
-                    int beer = ((KegBlockEntity) entity).beerType;
+                    ItemStack beerStack = switch (keg.beerType) {
+                        case 1 -> new ItemStack(AlcoItems.SPRUCE_MUG_SUN_PALE_ALE.get());
+                        case 2 -> new ItemStack(AlcoItems.SPRUCE_MUG_DIGGER_BITTER.get());
+                        case 3 -> new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_PORTER.get());
+                        case 4 -> new ItemStack(AlcoItems.SPRUCE_MUG_WITHER_STOUT.get());
+                        case 5 -> new ItemStack(AlcoItems.SPRUCE_MUG_MAGNET_PILSNER.get());
+                        case 6 -> new ItemStack(AlcoItems.SPRUCE_MUG_DROWNED_ALE.get());
+                        case 7 -> new ItemStack(AlcoItems.SPRUCE_MUG_NIGHT_RAUCH.get());
+                        case 8 -> new ItemStack(AlcoItems.SPRUCE_MUG_ICE_BEER.get());
+                        case 9 -> new ItemStack(AlcoItems.SPRUCE_MUG_KVASS.get());
+                        case 10 -> new ItemStack(AlcoItems.SPRUCE_MUG_LEPRECHAUN_CIDER.get());
+                        case 11 -> new ItemStack(AlcoItems.SPRUCE_MUG_CHORUS_ALE.get());
+                        case 12 -> new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_STAR_LAGER.get());
+                        default -> ItemStack.EMPTY;
+                    };
 
-                    if (beer == 1) {
+                    if (!beerStack.isEmpty()) {
                         if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_SUN_PALE_ALE.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_SUN_PALE_ALE.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_SUN_PALE_ALE.get()), false);
-                        }
-                    } else if (beer == 2) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_DIGGER_BITTER.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_DIGGER_BITTER.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_DIGGER_BITTER.get()), false);
-                        }
-                    } else if (beer == 3) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_PORTER.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_PORTER.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_PORTER.get()), false);
-                        }
-                    } else if (beer == 4) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_WITHER_STOUT.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_WITHER_STOUT.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_WITHER_STOUT.get()), false);
-                        }
-                    } else if (beer == 5) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_MAGNET_PILSNER.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_MAGNET_PILSNER.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_MAGNET_PILSNER.get()), false);
-                        }
-                    } else if (beer == 6) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_DROWNED_ALE.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_DROWNED_ALE.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_DROWNED_ALE.get()), false);
-                        }
-                    } else if (beer == 7) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_NIGHT_RAUCH.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_NIGHT_RAUCH.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_NIGHT_RAUCH.get()), false);
-                        }
-                    } else if (beer == 8) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_ICE_BEER.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_ICE_BEER.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_ICE_BEER.get()), false);
-                        }
-                    } else if (beer == 9) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_KVASS.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_KVASS.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_KVASS.get()), false);
-                        }
-                    } else if (beer == 10) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_LEPRECHAUN_CIDER.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_LEPRECHAUN_CIDER.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_LEPRECHAUN_CIDER.get()), false);
-                        }
-                    } else if (beer == 11) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_CHORUS_ALE.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_CHORUS_ALE.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_CHORUS_ALE.get()), false);
-                        }
-                    } else if (beer == 12) {
-                        if (itemStack.isEmpty()) {
-                            pPlayer.setItemInHand(pHand, new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_STAR_LAGER.get()));
-                        } else if (!pPlayer.getInventory().add(new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_STAR_LAGER.get()))) {
-                            pPlayer.drop(new ItemStack(AlcoItems.SPRUCE_MUG_NETHER_STAR_LAGER.get()), false);
+                            pPlayer.setItemInHand(pHand, beerStack);
+                        } else if (!pPlayer.getInventory().add(beerStack)) {
+                            pPlayer.drop(beerStack, false);
                         }
                     }
 
-                    ((KegBlockEntity) entity).beerLevel = ((KegBlockEntity) entity).beerLevel - 2;
+                    keg.beerLevel = keg.beerLevel - 2;
+                    keg.setChanged();
+                    pLevel.sendBlockUpdated(pPos, pState, pState, 3);
 
                 } else {
                     pLevel.playSound(null, pPos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1f, 0.01f);
                     pLevel.playSound(null, pPos, SoundEvents.BARREL_OPEN, SoundSource.BLOCKS, 0.3f, 0.7f);
-                    NetworkHooks.openGui(((ServerPlayer) pPlayer), (KegBlockEntity) entity, pPos);
+                    NetworkHooks.openScreen((ServerPlayer) pPlayer, (KegBlockEntity) entity, pPos);
                 }
             } else {
                 throw new IllegalStateException("No beer today :(");
@@ -207,8 +158,8 @@ public class KegBlock extends BaseEntityBlock {
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-        return createTickerHelper(pBlockEntityType, AlcoBlockEntities.KEG_ENTITY.get(),
-                KegBlockEntity::tick);
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState,
+            BlockEntityType<T> pBlockEntityType) {
+        return createTickerHelper(pBlockEntityType, AlcoBlockEntities.KEG_ENTITY.get(), KegBlockEntity::tick);
     }
 }

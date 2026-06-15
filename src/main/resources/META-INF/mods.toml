@@ -6,9 +6,9 @@ modId="alcocraft"
 version="${file.jarVersion}"
 displayName="Alcocraft"
 logoFile="alcocraft.png"
-authors="hadrus"
+authors="hadrus (colourlabs)"
 description='''
-Alcocraft is about brewing and drinking alcohol.
+Alcocraft is about brewing and drinking alcohol. (ported to 1.20+ by colourlabs!)
 '''
 [[dependencies.alcocraft]]
     modId="forge"
@@ -19,6 +19,6 @@ Alcocraft is about brewing and drinking alcohol.
 [[dependencies.alcocraft]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.2,1.19)"
+    versionRange="[1.20.1,1.21)"
     ordering="NONE"
     side="BOTH"

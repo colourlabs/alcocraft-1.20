@@ -1,10 +1,10 @@
 package net.hadrus.alcocraft.recipes;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.hadrus.alcocraft.AlcoCraft;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -13,17 +13,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
 public class KegRecipe implements Recipe<SimpleContainer> {
 
     private final ResourceLocation id;
     private final ItemStack output;
     private final NonNullList<Ingredient> recipeItems;
 
-    public KegRecipe(ResourceLocation id, ItemStack output,
-                                   NonNullList<Ingredient> recipeItems) {
+    public KegRecipe(ResourceLocation id, ItemStack output, NonNullList<Ingredient> recipeItems) {
         this.id = id;
         this.output = output;
         this.recipeItems = recipeItems;
@@ -31,8 +27,10 @@ public class KegRecipe implements Recipe<SimpleContainer> {
 
     @Override
     public boolean matches(SimpleContainer pContainer, Level pLevel) {
-        return recipeItems.get(0).test(pContainer.getItem(0)) && recipeItems.get(1).test(pContainer.getItem(1))
-                && recipeItems.get(2).test(pContainer.getItem(2)) && recipeItems.get(3).test(pContainer.getItem(3));
+        return recipeItems.get(0).test(pContainer.getItem(0))
+                && recipeItems.get(1).test(pContainer.getItem(1))
+                && recipeItems.get(2).test(pContainer.getItem(2))
+                && recipeItems.get(3).test(pContainer.getItem(3));
     }
 
     @Override
@@ -41,8 +39,8 @@ public class KegRecipe implements Recipe<SimpleContainer> {
     }
 
     @Override
-    public ItemStack assemble(SimpleContainer pContainer) {
-        return output;
+    public ItemStack assemble(SimpleContainer pContainer, RegistryAccess pRegistryAccess) {
+        return output.copy();
     }
 
     @Override
@@ -51,6 +49,11 @@ public class KegRecipe implements Recipe<SimpleContainer> {
     }
 
     @Override
+    public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+        return output.copy();
+    }
+
+    // Keep a no-arg version for internal use (e.g. in KegBlockEntity craftItem)
     public ItemStack getResultItem() {
         return output.copy();
     }
@@ -79,7 +82,7 @@ public class KegRecipe implements Recipe<SimpleContainer> {
     public static class Serializer implements RecipeSerializer<KegRecipe> {
         public static final Serializer INSTANCE = new Serializer();
         public static final ResourceLocation ID =
-                new ResourceLocation(AlcoCraft.MOD_ID,"beer_brewing");
+                new ResourceLocation(AlcoCraft.MOD_ID, "beer_brewing");
 
         @Override
         public KegRecipe fromJson(ResourceLocation id, JsonObject json) {
@@ -114,27 +117,6 @@ public class KegRecipe implements Recipe<SimpleContainer> {
                 ing.toNetwork(buf);
             }
             buf.writeItemStack(recipe.getResultItem(), false);
-        }
-
-        @Override
-        public RecipeSerializer<?> setRegistryName(ResourceLocation name) {
-            return INSTANCE;
-        }
-
-        @Nullable
-        @Override
-        public ResourceLocation getRegistryName() {
-            return ID;
-        }
-
-        @Override
-        public Class<RecipeSerializer<?>> getRegistryType() {
-            return Serializer.castClass(RecipeSerializer.class);
-        }
-
-        @SuppressWarnings("unchecked") // Need this wrapper, because generics
-        private static <G> Class<G> castClass(Class<?> cls) {
-            return (Class<G>)cls;
         }
     }
 }
